@@ -1,8 +1,19 @@
 const { OpenAI } = require('openai');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai = null;
+
+// Initialize OpenAI client lazily
+function getOpenAIClient() {
+  if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set. Please add it to your .env file.');
+    }
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 const systemPrompt = `You are an NHS Incident Reporting Assistant specializing in healthcare incident documentation. Your role is to help healthcare staff accurately report incidents through natural conversation.
 
@@ -48,6 +59,8 @@ When extracting data, provide it in a structured JSON format at the end of your 
  */
 async function analyzeIncident(userMessage, conversationHistory = []) {
   try {
+    const client = getOpenAIClient();
+
     // Build messages array
     const messages = [
       {
@@ -62,7 +75,7 @@ async function analyzeIncident(userMessage, conversationHistory = []) {
     ];
 
     // Call OpenAI API
-    const response = await openai.chat.completions.create({
+    const response = await client.chat.completions.create({
       model: 'gpt-4o',
       messages: messages,
       temperature: 0.7,
