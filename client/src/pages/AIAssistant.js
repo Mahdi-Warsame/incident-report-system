@@ -53,6 +53,10 @@ const AIAssistant = () => {
         conversationHistory
       });
 
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'API returned an error');
+      }
+
       // Add assistant message
       const assistantMessage = {
         type: 'assistant',
@@ -66,10 +70,16 @@ const AIAssistant = () => {
         setExtractedData(response.data.extractedData);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Full error object:', error);
+      console.error('Error message:', error.message);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
+      
       const errorMessage = {
         type: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: `Error: ${error.response?.data?.error || error.message || 'An unknown error occurred. Please try again.'}`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
