@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth');
 const incidentRoutes = require('./routes/incidents');
 const analyticsRoutes = require('./routes/analytics');
+const aiAssistantRoutes = require('./routes/aiAssistant');
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/incident-
 app.use('/api/auth', authRoutes);
 app.use('/api/incidents', incidentRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/ai', aiAssistantRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
