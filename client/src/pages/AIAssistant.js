@@ -23,6 +23,15 @@ const AIAssistant = () => {
     scrollToBottom();
   }, [messages]);
 
+  const getAuthToken = () => {
+    // Try to get token from localStorage
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No auth token found in localStorage');
+    }
+    return token;
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     
@@ -39,6 +48,12 @@ const AIAssistant = () => {
     setLoading(true);
 
     try {
+      // Get auth token
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Not authenticated. Please login again.');
+      }
+
       // Prepare conversation history
       const conversationHistory = messages
         .filter(msg => msg.type !== 'extracted-data')
@@ -47,10 +62,15 @@ const AIAssistant = () => {
           content: msg.content
         }));
 
-      // Call AI API
+      // Call AI API with auth token
       const response = await axios.post('/api/ai/analyze', {
         userMessage: userInput,
         conversationHistory
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.data.success) {
