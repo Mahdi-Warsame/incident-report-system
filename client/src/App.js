@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import IncidentForm from './pages/IncidentForm';
 import Dashboard from './pages/Dashboard';
 import IncidentList from './pages/IncidentList';
+import AIAssistant from './pages/AIAssistant';
 import Navbar from './components/Navbar';
 import './App.css';
 
@@ -49,6 +50,10 @@ function App() {
         <Route
           path="/report"
           element={isAuthenticated ? <IncidentForm /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/ai-assistant"
+          element={isAuthenticated ? <AIAssistant /> : <Navigate to="/login" />}
         />
         <Route
           path="/incidents"
