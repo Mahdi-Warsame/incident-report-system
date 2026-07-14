@@ -10,6 +10,7 @@ const Navbar = ({ user, onLogout }) => {
           <div className="flex gap-6">
             <Link to="/dashboard" className="hover:opacity-80 transition">Dashboard</Link>
             <Link to="/report" className="hover:opacity-80 transition">Report Incident</Link>
+            <Link to="/ai-assistant" className="hover:opacity-80 transition">AI Assistant</Link>
             <Link to="/incidents" className="hover:opacity-80 transition">Incidents</Link>
           </div>
         </div>
