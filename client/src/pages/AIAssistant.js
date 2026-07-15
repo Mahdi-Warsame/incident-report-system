@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './AIAssistant.css';
 
 const AIAssistant = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([
     {
       type: 'assistant',
@@ -12,7 +14,9 @@ const AIAssistant = () => {
   ]);
   const [userInput, setUserInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [extractedData, setExtractedData] = useState(null);
+  const [submitMessage, setSubmitMessage] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -24,7 +28,6 @@ const AIAssistant = () => {
   }, [messages]);
 
   const getAuthToken = () => {
-    // Try to get token from localStorage
     const token = localStorage.getItem('token');
     if (!token) {
       console.warn('No auth token found in localStorage');
@@ -37,7 +40,6 @@ const AIAssistant = () => {
     
     if (!userInput.trim()) return;
 
-    // Add user message to chat
     const userMessage = {
       type: 'user',
       content: userInput,
@@ -48,13 +50,11 @@ const AIAssistant = () => {
     setLoading(true);
 
     try {
-      // Get auth token
       const token = getAuthToken();
       if (!token) {
         throw new Error('Not authenticated. Please login again.');
       }
 
-      // Prepare conversation history
       const conversationHistory = messages
         .filter(msg => msg.type !== 'extracted-data')
         .map(msg => ({
@@ -62,7 +62,6 @@ const AIAssistant = () => {
           content: msg.content
         }));
 
-      // Call AI API with auth token
       const response = await axios.post('/api/ai/analyze', {
         userMessage: userInput,
         conversationHistory
@@ -77,7 +76,6 @@ const AIAssistant = () => {
         throw new Error(response.data.error || 'API returned an error');
       }
 
-      // Add assistant message
       const assistantMessage = {
         type: 'assistant',
         content: response.data.message,
@@ -85,7 +83,6 @@ const AIAssistant = () => {
       };
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Update extracted data if available
       if (response.data.extractedData) {
         setExtractedData(response.data.extractedData);
       }
@@ -108,11 +105,67 @@ const AIAssistant = () => {
     }
   };
 
-  const handleSubmitIncident = () => {
-    if (extractedData) {
-      // Pass extracted data to parent or navigate to incident form
-      console.log('Submitting incident:', extractedData);
-      // TODO: Submit to backend
+  const handleSubmitIncident = async () => {
+    if (!extractedData) return;
+
+    setSubmitting(true);
+    setSubmitMessage('Saving incident...');
+
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Not authenticated. Please login again.');
+      }
+
+      // Create incident object with extracted data
+      const incidentData = {
+        type: extractedData.incidentType || 'Other',
+        severity: extractedData.severity || 'Medium',
+        location: extractedData.location || 'Unknown',
+        dateOfIncident: extractedData.dateOfIncident || new Date().toISOString().split('T')[0],
+        timeOfIncident: extractedData.timeOfIncident || '00:00',
+        description: extractedData.description || '',
+        affectedIndividuals: extractedData.affectedIndividuals || 0,
+        actionsTaken: extractedData.actionsTaken || 'No actions documented',
+        immediateRisks: extractedData.immediateRisks || 'None identified',
+        status: 'reported'
+      };
+
+      // Submit to incidents API
+      const response = await axios.post('/api/incidents', incidentData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 201 || response.status === 200) {
+        setSubmitMessage('✅ Incident saved successfully!');
+        
+        // Reset form after 2 seconds
+        setTimeout(() => {
+          setMessages([
+            {
+              type: 'assistant',
+              content: 'Hello! I\'m your NHS Incident Report Assistant. I\'m here to help you report an incident accurately and completely. Please describe the incident, and I\'ll ask follow-up questions to gather all necessary information.',
+              timestamp: new Date()
+            }
+          ]);
+          setExtractedData(null);
+          setSubmitMessage('');
+          
+          // Navigate to incidents list after 3 seconds
+          setTimeout(() => {
+            navigate('/incidents');
+          }, 1000);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error submitting incident:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to save incident';
+      setSubmitMessage(`❌ Error: ${errorMsg}`);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -149,10 +202,10 @@ const AIAssistant = () => {
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               placeholder="Describe the incident..."
-              disabled={loading}
+              disabled={loading || submitting}
               className="chat-input"
             />
-            <button type="submit" disabled={loading} className="send-button">
+            <button type="submit" disabled={loading || submitting} className="send-button">
               {loading ? 'Sending...' : 'Send'}
             </button>
           </form>
@@ -180,6 +233,18 @@ const AIAssistant = () => {
                   <p>{extractedData.location}</p>
                 </div>
               )}
+              {extractedData.dateOfIncident && (
+                <div className="data-field">
+                  <label>Date:</label>
+                  <p>{extractedData.dateOfIncident}</p>
+                </div>
+              )}
+              {extractedData.timeOfIncident && (
+                <div className="data-field">
+                  <label>Time:</label>
+                  <p>{extractedData.timeOfIncident}</p>
+                </div>
+              )}
               {extractedData.description && (
                 <div className="data-field">
                   <label>Description:</label>
@@ -198,10 +263,30 @@ const AIAssistant = () => {
                   <p>{extractedData.actionsTaken}</p>
                 </div>
               )}
+              {extractedData.immediateRisks && (
+                <div className="data-field">
+                  <label>Immediate Risks:</label>
+                  <p>{extractedData.immediateRisks}</p>
+                </div>
+              )}
             </div>
-            {extractedData.complete && (
-              <button onClick={handleSubmitIncident} className="submit-button">
-                Submit Incident Report
+            {submitMessage && (
+              <div className={`submit-message ${submitMessage.includes('✅') ? 'success' : 'error'}`}>
+                {submitMessage}
+              </div>
+            )}
+            {extractedData.complete && !submitting && (
+              <button 
+                onClick={handleSubmitIncident} 
+                className="submit-button"
+                disabled={submitting}
+              >
+                {submitting ? 'Saving...' : '💾 Save to Incidents List'}
+              </button>
+            )}
+            {submitting && (
+              <button className="submit-button" disabled>
+                Saving...
               </button>
             )}
           </div>
