@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './LoginPage.css';
 
 const LoginPage = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -34,83 +35,117 @@ const LoginPage = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">NHS</h1>
-          <h2 className="text-xl font-semibold text-gray-800">
-            {isLogin ? 'Login' : 'Register'}
-          </h2>
-          <p className="text-gray-600 mt-2">
-            Incident Report System
-          </p>
+    <div className="login-container">
+      <div className="login-bg-pattern"></div>
+      
+      <div className="login-wrapper">
+        <div className="login-card">
+          <div className="login-header">
+            <img src="/sentricare-logo.svg" alt="SentriCare" className="login-logo" />
+            <h1>SentriCare</h1>
+            <p className="login-tagline">Safety Management System</p>
+          </div>
+
+          <div className="login-form-section">
+            <h2>{isLogin ? 'Sign In' : 'Create Account'}</h2>
+
+            {error && (
+              <div className="login-error">
+                <span>⚠️</span>
+                <p>{error}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="login-form">
+              {!isLogin && (
+                <>
+                  <div className="form-group">
+                    <label>First Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter your first name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Last Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter your last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button type="submit" disabled={loading} className="login-button">
+                {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
+              </button>
+            </form>
+
+            <div className="login-toggle">
+              <p>
+                {isLogin ? "Don't have an account?" : 'Already have an account?'}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError('');
+                }}
+                className="toggle-button"
+              >
+                {isLogin ? 'Sign Up' : 'Sign In'}
+              </button>
+            </div>
+          </div>
+
+          <div className="login-footer">
+            <p className="security-note">
+              🔒 Your data is secured with end-to-end encryption
+            </p>
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+        <div className="login-info">
+          <div className="info-card">
+            <h3>🎯 Less Form, More Safety</h3>
+            <p>Streamlined incident reporting with AI-powered assistance</p>
           </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <>
-              <input
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-900"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-900"
-                required
-              />
-            </>
-          )}
-
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-900"
-            required
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-900"
-            required
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full nhs-blue text-white py-2 rounded font-semibold hover:opacity-90 transition disabled:opacity-50"
-          >
-            {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
-          </button>
-        </form>
-
-        <div className="text-center mt-6">
-          <p className="text-gray-600">
-            {isLogin ? "Don't have an account?" : 'Already have an account?'}
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="ml-2 text-blue-900 font-semibold hover:underline"
-            >
-              {isLogin ? 'Register' : 'Login'}
-            </button>
-          </p>
+          <div className="info-card">
+            <h3>⚡ Fast & Easy</h3>
+            <p>Report incidents in minutes, not hours</p>
+          </div>
+          <div className="info-card">
+            <h3>📊 Real-time Analytics</h3>
+            <p>Track patterns and trends with interactive dashboards</p>
+          </div>
         </div>
       </div>
     </div>
