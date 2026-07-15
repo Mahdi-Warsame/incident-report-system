@@ -118,8 +118,9 @@ const AIAssistant = () => {
       }
 
       // Create incident object with extracted data
+      // IMPORTANT: Use 'incidentType' not 'type' - backend expects this field name
       const incidentData = {
-        type: extractedData.incidentType || 'Other',
+        incidentType: extractedData.incidentType || 'Other',
         severity: extractedData.severity || 'Medium',
         location: extractedData.location || 'Unknown',
         dateOfIncident: extractedData.dateOfIncident || new Date().toISOString().split('T')[0],
@@ -130,6 +131,8 @@ const AIAssistant = () => {
         immediateRisks: extractedData.immediateRisks || 'None identified',
         status: 'reported'
       };
+
+      console.log('Submitting incident data:', incidentData);
 
       // Submit to incidents API
       const response = await axios.post('/api/incidents', incidentData, {
@@ -162,7 +165,9 @@ const AIAssistant = () => {
       }
     } catch (error) {
       console.error('Error submitting incident:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Failed to save incident';
+      const errorMsg = error.response?.data?.errors 
+        ? error.response.data.errors.map(e => e.msg).join(', ')
+        : error.response?.data?.error || error.message || 'Failed to save incident';
       setSubmitMessage(`❌ Error: ${errorMsg}`);
     } finally {
       setSubmitting(false);
