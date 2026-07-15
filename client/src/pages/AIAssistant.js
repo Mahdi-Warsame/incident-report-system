@@ -118,18 +118,22 @@ const AIAssistant = () => {
       }
 
       // Create incident object with extracted data
-      // IMPORTANT: Use 'incidentType' not 'type' - backend expects this field name
+      // Parse date if it's a string
+      let dateOfIncident = extractedData.dateOfIncident || new Date().toISOString().split('T')[0];
+      if (typeof dateOfIncident === 'string') {
+        dateOfIncident = new Date(dateOfIncident).toISOString();
+      }
+
       const incidentData = {
         incidentType: extractedData.incidentType || 'Other',
         severity: extractedData.severity || 'Medium',
         location: extractedData.location || 'Unknown',
-        dateOfIncident: extractedData.dateOfIncident || new Date().toISOString().split('T')[0],
+        dateOfIncident: dateOfIncident,
         timeOfIncident: extractedData.timeOfIncident || '00:00',
         description: extractedData.description || '',
-        affectedIndividuals: extractedData.affectedIndividuals || 0,
+        affectedIndividuals: parseInt(extractedData.affectedIndividuals) || 1,
         actionsTaken: extractedData.actionsTaken || 'No actions documented',
-        immediateRisks: extractedData.immediateRisks || 'None identified',
-        status: 'reported'
+        status: 'Open' // Use 'Open' which is a valid enum value
       };
 
       console.log('Submitting incident data:', incidentData);
