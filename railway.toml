@@ -1,8 +1,7 @@
 [build]
-buildCommand = "npm run build && cd server && npm install"
+buildCommand = "CI=false npm run build && cd server && npm install"
 
 [build.env]
-CI = "false"
 NODE_OPTIONS = "--max_old_space_size=512"
 
 [deploy]
