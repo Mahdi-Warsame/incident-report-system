@@ -1,25 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './Navbar.css';
 
 const Navbar = ({ user, onLogout }) => {
   return (
-    <nav className="nhs-blue text-white shadow-lg">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="text-2xl font-bold">NHS Incident System</Link>
-          <div className="flex gap-6">
-            <Link to="/dashboard" className="hover:opacity-80 transition">Dashboard</Link>
-            <Link to="/report" className="hover:opacity-80 transition">Report Incident</Link>
-            <Link to="/ai-assistant" className="hover:opacity-80 transition">AI Assistant</Link>
-            <Link to="/incidents" className="hover:opacity-80 transition">Incidents</Link>
+    <nav className="sentricare-navbar">
+      <div className="navbar-container">
+        <div className="navbar-brand">
+          <Link to="/" className="navbar-logo">
+            <span className="logo-icon">🛡️</span>
+            <span className="logo-text">SentriCare</span>
+          </Link>
+          <div className="navbar-menu">
+            <Link to="/dashboard" className="navbar-link">Dashboard</Link>
+            <Link to="/report" className="navbar-link">Report Incident</Link>
+            <Link to="/ai-assistant" className="navbar-link">AI Assistant</Link>
+            <Link to="/incidents" className="navbar-link">Incidents</Link>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span>{user?.firstName} {user?.lastName}</span>
-          <button
-            onClick={onLogout}
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition"
-          >
+        <div className="navbar-user">
+          <span className="user-name">{user?.firstName} {user?.lastName}</span>
+          <button onClick={onLogout} className="logout-button">
             Logout
           </button>
         </div>
