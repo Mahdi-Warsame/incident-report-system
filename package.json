@@ -7,7 +7,10 @@
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm start",
     "client": "cd client && npm start",
-    "build": "cd client && npm run build",
+    "build": "cd client && npm install && npm run build",
+    "build:server": "cd server && npm install",
+    "postinstall": "npm run build && npm run build:server",
+    "start:prod": "cd server && node index.js",
     "test": "cd server && npm test && cd ../client && npm test"
   },
   "keywords": ["NHS", "incident", "reporting"],
